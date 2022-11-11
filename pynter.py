@@ -2,6 +2,7 @@
 class var(): ...
 class pynter_op_perfix(): ...
 class var_type(): ...
+class struct(): ...
 
 import memory
 
@@ -194,6 +195,11 @@ class var_type:
     # BYTE*_(asdf)
     def __mul__(self, dat):
         return var(self.type, int(dat), [1])
+
+    def __add__(self, dat):
+        if type(dat) != list:
+            raise TypeError("'dat' must be 'list' type")
+        return (self, dat)
     
     def __call__(self, dat):
         if type(dat) != var and not dat.is_ptr():
@@ -208,7 +214,16 @@ DWORD = var_type(4)
 QWORD = var_type(8)
 
 def memcpy(dest, src, count):
-    pass
+    dest = var(BYTE,int(dest),[count])
+    try:
+        src = var(BYTE,int(src),[count])
+    except: 
+        if len(src) < count:
+            raise IndexError("'len(src)' must greater than or equal to 'count'")
+
+    for i in range(count):
+        dest[i] = src[i]
+
 
 def sizeof(v):
     if type(v) == var:
@@ -216,5 +231,27 @@ def sizeof(v):
             return v.type
         else:
             return v.type * v.addr_interval * v.size[0]
+    elif type(v) == var_type:
+        return v.type
     else:
         return len(v)
+
+
+class struct:
+    def __init__(self, address, **items):
+        self.size = 0
+        if len(items) == 0:
+            raise TypeError('no items found')
+        for key in items.keys():
+            if type(items[key]) == tuple:
+                vtype = items[key][0]
+                arg3  = items[key][1]
+            else:
+                vtype = items[key]
+                arg3 = []
+
+            newaddr = address + self.size
+            memory.mem.check_addr(newaddr, vtype.type)
+            newattr = var(vtype, newaddr, arg3)
+            setattr(self, key, newattr)
+            self.size += sizeof(newattr)
