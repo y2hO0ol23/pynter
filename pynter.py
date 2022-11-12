@@ -26,12 +26,14 @@ class var():
     def __getitem__(self, offset: int): ...
     def __setitem__(self, offset, value: int): ...   
     def __repr__(self): ... 
+    def __next__(self): ...
 
     def is_ptr(self): ...
     def __bitmask(self): ...
     def set(self, other: int): ...
     def __oper(self, oper: str, other, option: int = 0): ...
     def __roper(self, oper: str, other, option: int = 0): ...
+    def to_string(self): ...
 
 
     def __init__(self, vtype: var_type, address: int, size: list = []):
@@ -215,6 +217,18 @@ class var():
     def __next__(self):
         return self.__addr + sizeof(self)
 
+    
+    def to_string(self):
+        if len(self.__size) != 1:
+            raise TypeError("to convert 'var' to 'str', var must be array")
+        
+        ret = b""
+        addr = self.__addr
+        while memory.mem.addr_lookup(addr):
+            ret += bytes([memory.mem.space[addr]])
+            addr += 1
+        return ret.decode()
+
 
 # for * and & 
 class pynter_op_perfix():
@@ -353,11 +367,14 @@ class struct:
 
 def memcpy(dest, src, count: int):
     dest = var(BYTE,int(dest),[count])
-    try:
-        src = var(BYTE,int(src),[count])
-    except: 
+    
+    if type(src) == str or type(src) == bytes:
+        if type(src) == str:
+            src = src.encode()
         if len(src) < count:
             raise IndexError("'len(src)' must greater than or equal to 'count'")
+    else:
+        src = var(BYTE,int(src),[count])
 
     for i in range(count):
         dest[i] = src[i]
@@ -373,5 +390,7 @@ def sizeof(v):
         return v._var_type__type
     elif type(v) == struct:
         return v._struct__size
+    elif type(v) == str:
+        return len(v.encode())
     else:
         return len(v)

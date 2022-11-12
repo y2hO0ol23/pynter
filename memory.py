@@ -15,7 +15,11 @@ class memory:
             raise ValueError('address must be 0 to ' + hex(addr_end) + ' with ' + str(self.bit) + ' bit memory')
     
     def addr_lookup(self, address):
+        self.check_addr(address, 1)
+
         if not self.space.get(address):
             self.space[address] = 0
+
+        return self.space[address]
 
 mem = memory()

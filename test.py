@@ -5,6 +5,9 @@ _ = pynter_op_perfix()
 
 # WORD v = var (&v = 0x1000)
 v = var(WORD, 0x1000)
+# set value using ==
+# needs to comapre, use like
+# if int(v) == 0x1234:
 v == 0x1234
 print("_&v :", _&v)
 print("v :", v)
@@ -56,3 +59,10 @@ print("_&v1 :", _&v1)
 print("_&v2 :", _&v2)
 print("v1 + v2 :", hex(v1 + v2))
 print("_&v2 - _&v1 :", _&v2 - _&v1)
+
+# using mathods
+st = var(BYTE, 0x6000, [1])
+copy = "안녕하세요!"
+memcpy(st, copy, sizeof(copy))
+print(st.to_string())
+
