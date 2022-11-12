@@ -4,10 +4,12 @@ _ = pynter_op_perfix()
 # use as _*A, _&A
 
 # WORD v = var (&v = 0x1000)
-v = var(BYTE, 0x1000)
-v == 20
+v = var(WORD, 0x1000)
+v == 0x1234
 print("_&v :", _&v)
 print("v :", v)
+print("BYTE(v) :", hex(BYTE(v)))
+print("(BYTE*(_&v))[1]", (BYTE*(_&v))[1])
 print()
 
 # BYTE li[3][5] (li = 0x2000)
@@ -25,10 +27,10 @@ print()
 print("li :", li)
 print()
 
-# struct s1 {
+# struct s {
 #   BYTE a1;
 #   DWORD a2[5][10];
-# } (&s1 = 0x3000)
+# } (&s = 0x3000)
 s = struct(0x3000, a1=BYTE, a2=DWORD+[5, 10])
 s.a1 == 12
 for i in range(5):
@@ -39,10 +41,13 @@ print("s :", s)
 print("s.a1 :", s.a1)
 print("s.a2 :", s.a2)
 print("s.a2[2][7] :", s.a2[2][7])
+# make items of new struct by another struct items
+temp = struct(0x4000, **s.item())
+print()
 
-# DWORD v1 = 0
-#
-v1 = var(DWORD,0x4000)
+# DWORD v1 (&v1 = 0x5000)
+# DWORD v2 (&v2 = next from &v1)
+v1 = var(DWORD,0x5000)
 v2 = var(DWORD,next(v1))
 v1 == 0x1234
 v2 == 0x9876
